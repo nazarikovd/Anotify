@@ -161,7 +161,8 @@ module.exports = class AnotifyApi{
 			albumType: album.album_type,
 			mainColor: album.main_color,
 			accessKey: album.access_key,
-			photo: album.photo || {}
+			photo: album.photo || {},
+			subtitle: album.subtitle || ""
 		}
 	}
 
@@ -188,6 +189,7 @@ module.exports = class AnotifyApi{
 				id: artistData.id,
 				name: artistData.name,
 				domain: artistData.domain,
+				photo: artistData.photo.at(-1).url || null,
 				isAlbumCover: artistData.is_album_cover || false
 			},
 			albums: albums,

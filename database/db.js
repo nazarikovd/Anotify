@@ -81,6 +81,13 @@ module.exports = class notifydb {
 		`).run(Number(user_id), String(artist_id))
 	}
 
+	unsubscribeAll(user_id) {
+		this.db.prepare(`
+			DELETE FROM subscriptions
+			WHERE user_id = ?
+		`).run(Number(user_id))
+	}
+
 	getUserSubscriptions(user_id) {
 		return this.db.prepare(`
 			SELECT a.* FROM artists a

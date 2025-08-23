@@ -22,16 +22,16 @@ module.exports = class Anotify extends EventEmitter {
 	async addArtist(artistUrl) {
 
 		const domain = this._extractArtistDomain(artistUrl)
-		if (!domain) throw new Error('Invalid artist URL')
+		if (!domain) throw new Error('Неправильный URL')
 
 		const artistInfo = await this.api.getArtistWithAlbums(domain)
-		if (!artistInfo) throw new Error('Artist domain not found or wrong artist')
+		if (!artistInfo) throw new Error('Не могу найти такого артиста')
 
 		const artist = artistInfo.artist
 
 		this.db.addArtist(artist.id, artist.name, artist.domain)
 		this.db.updateArtistRelease(artist.id, artistInfo.last)
-		
+
 		return artist
 
 	}
@@ -41,18 +41,27 @@ module.exports = class Anotify extends EventEmitter {
 		return this.db.subscribe(user_id, artist_id)
 	}
 
-	async unsubscribeUser(user_id, artistUrl) {
+	async unsubscribeUser(user_id, artistUrl=null) {
+
+		if(!artistUrl){
+			if(this.db.getUserSubscriptions(user_id).length > 0){
+				return this.db.unsubscribeAll(user_id)
+			}else{
+				throw new Error('Вы не подписаны')
+			}
+
+		}
 
 		const domain = this._extractArtistDomain(artistUrl)
-		if (!domain) throw new Error('Invalid artist URL')
+		if (!domain) throw new Error('Неправильный URL')
 
 		let artist_id = await this.api.getArtistIdByDomain(domain)
-		if (!artist_id) throw new Error('Artist domain not found or wrong artist')
+		if (!artist_id) throw new Error('Не могу найти такого артиста')
 
 		const subs = this.db.getUserSubscriptions(user_id)
 
 		if(subs.filter((artist) => String(artist.artist_id) == String(artist_id)).length < 1){
-			throw new Error('You are not subscribed')
+			throw new Error('Вы не подписаны')
 		}
 
 		return this.db.unsubscribe(user_id, artist_id)
@@ -183,7 +192,7 @@ module.exports = class Anotify extends EventEmitter {
 			return null
 
 		} catch (error) {
-			console.error('Error parsing URL:', error)
+			console.error('Не получилось достать домен:', error)
 			return null
 		}
 
